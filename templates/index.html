@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GitHub Events</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f7f7f7;
+    }
+    .event {
+      background: white;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+<h2>Latest GitHub Activity</h2>
+<div id="events"></div>
+
+<script>
+async function fetchEvents() {
+  const res = await fetch("/events");
+  const data = await res.json();
+
+  const container = document.getElementById("events");
+  container.innerHTML = "";
+
+  data.forEach(e => {
+    let text = "";
+
+    if (e.event_type === "push") {
+      text = `${e.author} pushed to ${e.to_branch} on ${new Date(e.timestamp).toUTCString()}`;
+    }
+
+    if (e.event_type === "pull_request") {
+      text = `${e.author} submitted a pull request from ${e.from_branch} to ${e.to_branch} on ${new Date(e.timestamp).toUTCString()}`;
+    }
+
+    if (e.event_type === "merge") {
+      text = `${e.author} merged branch ${e.from_branch} to ${e.to_branch} on ${new Date(e.timestamp).toUTCString()}`;
+    }
+
+    const div = document.createElement("div");
+    div.className = "event";
+    div.innerText = text;
+
+    container.appendChild(div);
+  });
+}
+
+// initial load
+fetchEvents();
+
+// poll every 15 seconds
+setInterval(fetchEvents, 15000);
+</script>
+
+</body>
+</html>
