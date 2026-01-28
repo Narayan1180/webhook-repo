@@ -25,7 +25,7 @@ def get_events():
     response = []
     for e in events:
         response.append({
-            "event_type": e["event_type"],
+            "event_type": e["action_type"],
             "author": e["author"],
             "from_branch": e.get("from_branch"),
             "to_branch": e.get("to_branch"),
