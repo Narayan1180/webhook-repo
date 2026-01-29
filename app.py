@@ -45,15 +45,16 @@ def ordinal(n):
     return str(n) + suffix
 
 def format_utc_with_ordinal(ts):
-    """
-    Convert ISO timestamp (GitHub) to format:
-    2nd April 2021 - 12:00 PM UTC
-    """
-    dt = datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(timezone.utc)
+    if not ts:
+        return None
+
+    dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+
     day = ordinal(dt.day)
     month = dt.strftime("%B")
     year = dt.year
     time = dt.strftime("%I:%M %p")
+
     return f"{day} {month} {year} - {time} UTC"
 
 
