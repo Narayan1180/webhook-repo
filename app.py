@@ -36,6 +36,27 @@ def get_events():
 
 
 
+# ----------------- Helper for ordinal date -----------------
+def ordinal(n):
+    if 10 <= n % 100 <= 20:
+        suffix = "th"
+    else:
+        suffix = {1:"st",2:"nd",3:"rd"}.get(n % 10, "th")
+    return str(n) + suffix
+
+def format_utc_with_ordinal(ts):
+    """
+    Convert ISO timestamp (GitHub) to format:
+    2nd April 2021 - 12:00 PM UTC
+    """
+    dt = datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(timezone.utc)
+    day = ordinal(dt.day)
+    month = dt.strftime("%B")
+    year = dt.year
+    time = dt.strftime("%I:%M %p")
+    return f"{day} {month} {year} - {time} UTC"
+
+
 @app.route("/webhook", methods=["POST"])
 def receive_webhook():
     event_type = request.headers.get("X-GitHub-Event")
@@ -58,13 +79,14 @@ def receive_webhook():
 
 def handle_push(payload):
     try:
+
         return {
 
             "action_type": "push",
             "author": payload["pusher"]["name"],
             "from_branch": None,
             "to_branch": payload["ref"].split("/")[-1],
-            "timestamp": payload["head_commit"]["timestamp"]
+            "timestamp":format_utc_with_ordinal(payload["head_commit"]["timestamp"])
         }
     except:
         return {}
@@ -82,7 +104,7 @@ def handle_pr(payload):
             "author": pr["user"]["login"],
             "from_branch": pr["head"]["ref"],
             "to_branch": pr["base"]["ref"],
-            "timestamp": pr["created_at"]
+            "timestamp": format_utc_with_ordinal(pr["created_at"])
         }
 
     # PR merged
@@ -95,7 +117,7 @@ def handle_pr(payload):
             "author": pr["merged_by"]["login"],
             "from_branch": pr["head"]["ref"],
             "to_branch": pr["base"]["ref"],
-            "timestamp": pr["merged_at"]
+            "timestamp": format_utc_with_ordinal(pr["merged_at"])
         }
 
     return {}
