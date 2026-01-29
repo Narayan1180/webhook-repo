@@ -40,6 +40,7 @@ def get_events():
 def receive_webhook():
     event_type = request.headers.get("X-GitHub-Event")
     data = request.json
+    print(data)
 
     processed = {}
 
@@ -58,6 +59,7 @@ def receive_webhook():
 def handle_push(payload):
     try:
         return {
+
             "action_type": "push",
             "author": payload["pusher"]["name"],
             "from_branch": None,
@@ -74,6 +76,8 @@ def handle_pr(payload):
     if action == "opened":
         pr = payload["pull_request"]
         return {
+            "request_id": pr["id"],     
+
             "action_type": "pull_request",
             "author": pr["user"]["login"],
             "from_branch": pr["head"]["ref"],
@@ -85,6 +89,8 @@ def handle_pr(payload):
     elif action == "closed" and payload["pull_request"].get("merged"):
         pr = payload["pull_request"]
         return {
+            
+            "request_id": pr["id"],      
             "action_type": "merge",
             "author": pr["merged_by"]["login"],
             "from_branch": pr["head"]["ref"],
@@ -96,7 +102,7 @@ def handle_pr(payload):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8000))
     app.run(host="0.0.0.0", port=port)
 
 
